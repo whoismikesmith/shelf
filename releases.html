@@ -1,0 +1,30 @@
+<!-- releases.html -->
+
+<html>
+
+<body>
+  <h1>{{length}} Releases</h1> {% set count = {'value': 0} %}
+  <div>
+    <h2>Filters</h2>
+    {% for format in formats %}
+      <a href="/format/{{format}}">{{format}}</a>
+    {% endfor %}
+  </div>
+  <hr>
+  {% for release in releases %}
+  <div>
+    {{count.value}}
+    <a href="/select/{{count.value}}">
+        {% for artist in release["basic_information"]["artists"] %}
+        <span style="font-weight:bold">{{artist["name"]}} {{artist["join"]}}</span>
+        {% endfor %}
+        <span>{{release["basic_information"]["title"]}}</span>
+    </a> {% if count.update({'value': (count.value + 1)}) %} {% endif %} {% if release["basic_information"]["formats"][0]["descriptions"] is defined %}
+    <span style="font-style:italic">{{release["basic_information"]["formats"][0]["descriptions"][0]}}</span> {% endif %} {% if release["basic_information"]["labels"][0]["name"] is defined %}
+    <span style="font-style:italic">{{release["basic_information"]["labels"][0]["name"]}}</span> {% endif %} {% if release["basic_information"]["year"] is defined %}
+    <span style="font-style:italic">{{release["basic_information"]["year"]}}</span> {% endif %}
+  </div>
+  {% endfor %}
+</body>
+
+</html>
