@@ -1,4 +1,4 @@
-# shelf.py
+# app.py
 
 from flask import Flask, render_template
 import requests
@@ -39,6 +39,7 @@ filteredCollection = []
 formats = 'null'
 
 app = Flask(__name__, template_folder='.')
+
 def dataCheck():
 	#check to see if collection.json exists
 	if os.path.isfile('collection.json'):
@@ -49,7 +50,7 @@ def dataCheck():
 			return collection
 	else:
 		#otherwise return error page with fixLink
-		return render_template('error.html', errorMessage="No collection loaded!", fixText="Click here to load collection data", fixLink="/load/")
+		return _template('static/error.html', errorMessage="No collection loaded!", fixText="Click here to load collection data", fixLink="/load/")
 
 def loadFormats(data):
 	global formats
@@ -175,9 +176,9 @@ def homepage():
 		  formats = loadFormats(data)
   else:
 	  #otherwise return error page with fixLink
-	  return render_template('error.html', errorMessage="No collection loaded!", fixText="Click here to load collection data", fixLink="/load/")
+	  return render_template('static/error.html', errorMessage="No collection loaded!", fixText="Click here to load collection data", fixLink="/load/")
 #render releases.html with saved collection data from collection.json
-  return render_template('releases.html', releases=data, formats=formats, length=len(data))
+  return render_template('static/releases.html', releases=data, formats=formats, length=len(data))
 
 @app.route('/load/')
 def loadpage():
@@ -193,7 +194,7 @@ def loadpage():
   #print collection
   with open('collection.json', 'w') as outfile:
 	json.dump(collection, outfile)
-  return render_template('success.html', message="Collection data updated!", linkUrl="../", linkText="Click to return home")
+  return render_template('static/success.html', message="Collection data updated!", linkUrl="../", linkText="Click to return home")
 
 @app.route('/blink/<int:selectedLed>')
 def locate(selectedLed):
@@ -221,7 +222,7 @@ def selectPage(selectedIndex):
 	#mirrorWipe(led, timeout in seconds)
 	mirrorWipe(offsetLed, 5)
 	print ("LED : "+str(led)+" Offset LED : "+str(offsetLed))
-	return render_template('releases.html', releases=collection, formats=formats, length=len(collection))
+	return render_template('static/releases.html', releases=collection, formats=formats, length=len(collection))
 
 @app.route('/format/<format>')
 def formatpage(format):
@@ -236,9 +237,9 @@ def formatpage(format):
 		  filteredCollection = formatFilter(collection,[format])
   else:
 	  #otherwise return error page with fixLink
-	  return render_template('error.html', errorMessage="No collection loaded!", fixText="Click here to load collection data", fixLink="/load/")
+	  return render_template('static/error.html', errorMessage="No collection loaded!", fixText="Click here to load collection data", fixLink="/load/")
 #render releases.html with saved collection data from collection.json
-  return render_template('releases.html', releases=filteredCollection, formats=formats, length=len(filteredCollection))
+  return render_template('static/releases.html', releases=filteredCollection, formats=formats, length=len(filteredCollection))
 
 
 if __name__ == '__main__':
