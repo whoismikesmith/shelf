@@ -1,9 +1,12 @@
 # app.py
 
 from flask import Flask, render_template, request
+
 import requests
 import json
 import opc, time, datetime, sched, sys, itertools, os.path, math
+
+from config import discogsUsername, sort, pageNumber
 
 totalPixels = 500
 selectedNo = 0
@@ -23,16 +26,13 @@ blankFrame = [ black ] * totalPixels
 client = opc.Client('localhost:7890')
 
 #provide your discogs.com username
-userName = "whoismikesmith"
-#default page number
-pageNumber = "1"
-#valid sorts : label artist title catno format rating added year
-sort = "artist"
+userName = discogsUsername
+
 #params = {
   #'api_key': '{API_KEY}',
 #}
-#r = requests.get('https://api.discogs.com/users/' + userName + '/collection/folders/0/releases?per_page=50&page=' + pageNumber + '&sort=' + sort)
-#num_pages = json.loads(r.text)['pagination']['pages']
+r = requests.get('https://api.discogs.com/users/' + userName + '/collection/folders/0/releases?per_page=50&page=' + pageNumber + '&sort=' + sort)
+num_pages = json.loads(r.text)['pagination']['pages']
 
 collection = []
 filteredCollection = []
@@ -67,9 +67,7 @@ def dataCheck():
 				except KeyError:
 					print ("Error on " + f["basic_information"]["title"])
 			return newCollection
-	else:
-		#otherwise return error page with fixLink
-		return _template('static/error.html', errorMessage="No collection loaded!", fixText="Click here to load collection data", fixLink="/load/")
+
 
 def loadFormats(data):
 	global formats
@@ -187,8 +185,14 @@ def blink(led, count, speed):
 def homepage():
   #check to see if collection.json exists
   collection = dataCheck()
-#render releases.html with saved collection data from collection.json
-  return render_template('static/releases.html', releases=collection, formats=formats, length=len(collection))
+  #
+  if os.path.isfile('collection.json'):
+	#return error page with fixLink
+	return render_template('static/releases.html', releases=collection, formats=formats, length=len(collection))
+	#return str(len(collection))
+  else:
+	return render_template('static/error.html', errorMessage="No collection loaded!", fixText="Click here to load collection data", fixLink="/load/")
+	#return str(len(collection))
 
 @app.route('/load/')
 def loadpage():
