@@ -185,7 +185,7 @@ def blink(led, count, speed):
 def homepage():
   #check to see if collection.json exists
   collection = dataCheck()
-  #
+  #check to see if collection.json has been downloaded already and route appropriately
   if os.path.isfile('collection.json'):
 	#return error page with fixLink
 	return render_template('static/releases.html', releases=collection, formats=formats, length=len(collection))
