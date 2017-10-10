@@ -41,6 +41,8 @@ formats = 'null'
 app = Flask(__name__, template_folder='.')
 
 def dataCheck():
+	global formats
+	global newCollection
 	print "dataCheck called"
 	#check to see if collection.json exists
 	if os.path.isfile('collection.json'):
@@ -48,7 +50,23 @@ def dataCheck():
 		with open('collection.json') as data_file:
 			#if collection.json exists, use it to fill 'collection'
 			collection = json.load(data_file)
-			return collection
+			formats = loadFormats(collection)
+			#filter
+			newCollection = []
+			for f in collection:
+				try:
+					if f.get("basic_information", {}).get("formats"):
+						#print f.get("basic_information", {}).get("formats")
+						types = f["basic_information"]["formats"][0]["descriptions"]
+						#make this user-definable
+						wanted = ["LP", "12\""]
+						for w in wanted:
+							if w in types:
+								newCollection.append(f)
+						#print f
+				except KeyError:
+					print ("Error on " + f["basic_information"]["title"])
+			return newCollection
 	else:
 		#otherwise return error page with fixLink
 		return _template('static/error.html', errorMessage="No collection loaded!", fixText="Click here to load collection data", fixLink="/load/")
@@ -167,19 +185,10 @@ def blink(led, count, speed):
 
 @app.route('/')
 def homepage():
-  global data
   #check to see if collection.json exists
-  if os.path.isfile('collection.json'):
-	  #open .json if it exists
-	  with open('collection.json') as data_file:
-		  #if collection.json exists, use it to fill 'collection'
-		  data = json.load(data_file)
-		  formats = loadFormats(data)
-  else:
-	  #otherwise return error page with fixLink
-	  return render_template('static/error.html', errorMessage="No collection loaded!", fixText="Click here to load collection data", fixLink="/load/")
+  collection = dataCheck()
 #render releases.html with saved collection data from collection.json
-  return render_template('static/releases.html', releases=data, formats=formats, length=len(data))
+  return render_template('static/releases.html', releases=collection, formats=formats, length=len(collection))
 
 @app.route('/load/')
 def loadpage():
@@ -252,7 +261,7 @@ def test():
 		clicked=json['data']
 	#print clicked
 	#change record index to corresponding led
-	led = index2led(int(clicked), len(data))
+	led = index2led(int(clicked), len(newCollection))
 
 	#special offset for specific area of shelves that has items to be located
 	offsetLed = led + recordAreaOffset
