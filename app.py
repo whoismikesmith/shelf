@@ -1,6 +1,6 @@
 # app.py
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import requests
 import json
 import opc, time, datetime, sched, sys, itertools, os.path, math
@@ -41,6 +41,7 @@ formats = 'null'
 app = Flask(__name__, template_folder='.')
 
 def dataCheck():
+	print "dataCheck called"
 	#check to see if collection.json exists
 	if os.path.isfile('collection.json'):
 		#open .json if it exists
@@ -166,7 +167,7 @@ def blink(led, count, speed):
 
 @app.route('/')
 def homepage():
-  global collection
+  global data
   #check to see if collection.json exists
   if os.path.isfile('collection.json'):
 	  #open .json if it exists
@@ -241,6 +242,25 @@ def formatpage(format):
 #render releases.html with saved collection data from collection.json
   return render_template('static/releases.html', releases=filteredCollection, formats=formats, length=len(filteredCollection))
 
+@app.route('/test/', methods=['GET','POST'])
+def test():
+	clicked=None
+	#print clicked
+	if request.method == "POST":
+		#print clicked
+		json = request.get_json()
+		clicked=json['data']
+	#print clicked
+	#change record index to corresponding led
+	led = index2led(int(clicked), len(data))
+
+	#special offset for specific area of shelves that has items to be located
+	offsetLed = led + recordAreaOffset
+
+	#mirrorWipe(led, timeout in seconds)
+	mirrorWipe(offsetLed, 5)
+	print ("LED : "+str(led)+" Offset LED : "+str(offsetLed))
+	return clicked
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', debug=True)

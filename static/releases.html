@@ -2,29 +2,101 @@
 
 <html>
 
+<head>
+  <script type=text/javascript src="{{
+  url_for('static', filename='js/jquery.min.js') }}"></script>
+  <script type=text/javascript src="{{
+  url_for('static', filename='js/datatables.min.js') }}"></script>
+  <link rel="stylesheet" type="text/css" href="{{
+  url_for('static', filename='css/datatables.min.css') }}">
+</head>
+
 <body>
-  <h1>{{length}} Releases</h1> {% set count = {'value': 0} %}
+  <!-- <h1>{{length}} Releases</h1> {% set count = {'value': 0} %}
   <div>
-    <h2>Filters</h2>
-    {% for format in formats %}
-      <a href="/format/{{format}}">{{format}}</a>
-    {% endfor %}
+    <h2>Filters</h2> {% for format in formats %}
+    <a id=format href="#">{{format}}</a> {% endfor %}
   </div>
-  <hr>
-  {% for release in releases %}
-  <div>
-    {{count.value}}
-    <a href="/select/{{count.value}}">
-        {% for artist in release["basic_information"]["artists"] %}
-        <span style="font-weight:bold">{{artist["name"]}} {{artist["join"]}}</span>
-        {% endfor %}
-        <span>{{release["basic_information"]["title"]}}</span>
-    </a> {% if count.update({'value': (count.value + 1)}) %} {% endif %} {% if release["basic_information"]["formats"][0]["descriptions"] is defined %}
-    <span style="font-style:italic">{{release["basic_information"]["formats"][0]["descriptions"][0]}}</span> {% endif %} {% if release["basic_information"]["labels"][0]["name"] is defined %}
-    <span style="font-style:italic">{{release["basic_information"]["labels"][0]["name"]}}</span> {% endif %} {% if release["basic_information"]["year"] is defined %}
-    <span style="font-style:italic">{{release["basic_information"]["year"]}}</span> {% endif %}
-  </div>
-  {% endfor %}
+  <hr> -->
+  <table id="releases" class="display">
+    <thead>
+      <tr>
+        <th>Index</th>
+        <th>Artist(s)</th>
+        <th>Title</th>
+        <th>Format</th>
+        <th>Label</th>
+        <th>Year</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for release in releases %}
+      <tr>
+        <td>
+          {{count.value}}
+        </td>
+        <td>
+          {% for artist in release["basic_information"]["artists"] %}
+          <span style="font-weight:bold">{{artist["name"]}} {{artist["join"]}}</span>
+          {% endfor %}
+        </td>
+        <td>
+            {{release["basic_information"]["title"]}}
+        </td>
+        <td>
+      {% if release["basic_information"]["formats"][0]["descriptions"] is defined %}
+          <span style="font-style:italic">{{release["basic_information"]["formats"][0]["descriptions"][0]}}</span> {% endif %}
+        </td>
+        <td>
+      {% if release["basic_information"]["labels"][0]["name"] is defined %}
+          <span style="font-style:italic">{{release["basic_information"]["labels"][0]["name"]}}</span> {% endif %}
+        </td>
+        <td>
+      {% if release["basic_information"]["year"] is defined %}
+          <span style="font-style:italic">{{release["basic_information"]["year"]}}</span> {% endif %}
+        </td>
+      </tr>
+      {% if count.update({'value': (count.value + 1)}) %} {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+  <script type=text/javascript>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $(function() {
+      $('a#format').bind('click', function() {
+        var text = $(this).text();
+        console.log(text)
+      })
+    });
+
+    $(document).ready(function() {
+      var clicked;
+      table = $('#releases').DataTable({
+        select : {
+          style : 'single'
+        },
+        "iDisplayLength" : 20
+      });
+      table
+      .on( 'select', function ( e, dt, type, indexes ) {
+          var rowData = table.rows( indexes ).data().toArray();
+          //clicked = rowData[0][0];
+          $.ajax({
+            type: 'POST',
+            url: "{{url_for('test')}}",
+            data: JSON.stringify({"data":rowData[0][0]
+            }),
+            error: function(e) {
+              console.log(e);
+            },
+            dataType: "json",
+            contentType: "application/json"
+          });
+      } );
+      table.draw();
+
+    });
+  </script>
 </body>
 
 </html>
