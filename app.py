@@ -37,10 +37,12 @@ num_pages = json.loads(r.text)['pagination']['pages']
 collection = []
 filteredCollection = []
 formats = 'null'
+wanted = ["LP","12\""]
 
 app = Flask(__name__, template_folder='.')
 
 def dataCheck():
+	global wanted
 	global formats
 	global newCollection
 	print "dataCheck called"
@@ -59,7 +61,6 @@ def dataCheck():
 						#print f.get("basic_information", {}).get("formats")
 						types = f["basic_information"]["formats"][0]["descriptions"]
 						#make this user-definable
-						wanted = ["LP", "12\""]
 						for w in wanted:
 							if w in types:
 								newCollection.append(f)
@@ -274,6 +275,22 @@ def test():
 	mirrorWipe(offsetLed, 5)
 	print ("LED : "+str(led)+" Offset LED : "+str(offsetLed))
 	return clicked
+
+@app.route('/filters/', methods=['GET','POST'])
+def filters():
+	global wanted
+	global collection
+	if request.method == "POST":
+		json = request.get_json()
+		selectedFormats=json['data']
+	#change record index to corresponding led
+	wanted = selectedFormats
+	collection = dataCheck()
+	for w in wanted:
+		print ("wanted array updated : " + w)
+ 	#print collection
+	return render_template('static/releases.html', releases=collection, formats=formats, length=len(collection))
+
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', debug=True)

@@ -9,15 +9,20 @@
   url_for('static', filename='js/datatables.min.js') }}"></script>
   <link rel="stylesheet" type="text/css" href="{{
   url_for('static', filename='css/datatables.min.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{
+  url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
-  <!-- <h1>{{length}} Releases</h1> {% set count = {'value': 0} %}
+  <!-- <h1>{{length}} Releases</h1> {% set count = {'value': 0} %}-->
   <div>
     <h2>Filters</h2> {% for format in formats %}
-    <a id=format href="#">{{format}}</a> {% endfor %}
+    <form>
+      <input class="check" type="checkbox" name="{{format}}" value="{{format}}" id="{{format}}"><label class="labelcheck" for={{format}}> <span> {{format}} </span> </label>
+        {% endfor %}
+    </form>
   </div>
-  <hr> -->
+  <hr>
   <table id="releases" class="display">
     <thead>
       <tr>
@@ -62,40 +67,57 @@
   </table>
   <script type=text/javascript>
   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-    $(function() {
-      $('a#format').bind('click', function() {
-        var text = $(this).text();
-        console.log(text)
-      })
-    });
 
-    $(document).ready(function() {
-      var clicked;
-      table = $('#releases').DataTable({
-        select : {
-          style : 'single'
-        },
-        "iDisplayLength" : 20
+      $(document).ready(function() {
+        var formatfilters = [];
+        var clicked;
+        table = $('#releases').DataTable({
+          select : {
+            style : 'single'
+          },
+          "iDisplayLength" : 20
+        });
+        table
+        .on( 'select', function ( e, dt, type, indexes ) {
+            var rowData = table.rows( indexes ).data().toArray();
+            //clicked = rowData[0][0];
+            $.ajax({
+              type: 'POST',
+              url: "{{url_for('test')}}",
+              data: JSON.stringify({"data":rowData[0][0]
+              }),
+              error: function(e) {
+                console.log(e);
+              },
+              dataType: "json",
+              contentType: "application/json"
+            });
+        } );
+        table.draw();
+
+        $(function() {
+          $('.check').change(function() {
+            this.checked ? formatfilters.push(this.value) : formatfilters.splice($.inArray(this.value, formatfilters), 1);
+            console.log(formatfilters)
+            $.ajax({
+              type: 'POST',
+              url: "{{url_for('filters')}}",
+              data: JSON.stringify({"data":formatfilters
+              }),
+              error: function(e) {
+                console.log(e);
+              },
+              dataType: "json",
+              contentType: "application/json"
+            });
+            
+            //reload page because it made it work
+            location.reload();
+            //console.log(releases);
+          })
+        });
+
       });
-      table
-      .on( 'select', function ( e, dt, type, indexes ) {
-          var rowData = table.rows( indexes ).data().toArray();
-          //clicked = rowData[0][0];
-          $.ajax({
-            type: 'POST',
-            url: "{{url_for('test')}}",
-            data: JSON.stringify({"data":rowData[0][0]
-            }),
-            error: function(e) {
-              console.log(e);
-            },
-            dataType: "json",
-            contentType: "application/json"
-          });
-      } );
-      table.draw();
-
-    });
   </script>
 </body>
 
