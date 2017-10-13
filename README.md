@@ -1,80 +1,88 @@
 # recordShelf
 
-A light-based tool to visualize information about different types of media stored on shelves. 
+A light-based tool to visualize information about vinyl record collections. The system is meant for you to browse a digital list of records, select one, and have an indicator LED nearest the desired record blink to help you find it's location.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+This flask app will start a local web server which will attempt to download a public Discogs user's entire collection to a local json file. You can then browse the collection, filtering it by various criteriea or searching via text input, and make a selection to be indicated by an LED on the actual shelf.
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+We will use Fadecandy and opc drive the LEDs
 
 ```
-Give examples
+https://github.com/scanlime/fadecandy
+```
+
+We will use Flask for the web server/framework .
+
+```
+sudo pip install Flask
 ```
 
 ### Installing
 
-A step by step series of examples that tell you have to get a development env running
-
-Say what the step will be
+Clone the repository to your local system.
 
 ```
-Give the example
+git clone https://github.com/whoismikesmith/shelf
 ```
 
-And repeat
+Navigate to the project folder
 
 ```
-until finished
+cd shelf
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
+Edit config.py and set the variable discogsUsername to your Discogs username
 
 ```
-Give an example
+discogsUsername = "REPLACE_WITH_YOUR_DISCOGS_USERNAME"
 ```
 
-### And coding style tests
-
-Explain what these tests test and why
+In a new terminal window, start the web server
 
 ```
-Give an example
+python app.py
 ```
+
+Enter this url into a browser
+
+```
+http://localhost:5000
+```
+
+You should get an error stating you need to download new data, click the link to start the download process.
+
+```
+Click here to load collection data
+```
+
+While the collection data is being downloaded from discogs, you should see information feeding back in the terminal window about what page of data is currently being downloaded. When the process finishes your browser should refresh with a success message. Click to return home.
+
+```
+Click to return home.
+```
+
+Installation complete! You should now be able to browse a local list of your Discogs record collection that will trigger LED animations on a fadecandy server corresponding to the records physical locaton.
 
 ## Deployment
 
-Add additional notes about how to deploy this on a live system
+You will have to edit variables for the number of LEDs in your setup if it differs from mine, as well as an offset to account for records only taking up a portion of your shelf. Will add this soon.
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+* [Flask](http://flask.pocoo.org/) - The web framework used
+* [Fadecandy](https://github.com/scanlime/fadecandy) - LED Driver
+* [Discogs API v2](https://www.discogs.com/developers/) - Used to gather data about record collection
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
+I would love some help/criticism/feedback, I'm new to collaborative coding.
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+* **Mike Smith** - *Initial work* - [whoismikesmith](https://github.com/whoismikesmith)
 
 ## License
 
@@ -82,6 +90,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* Hat tip to anyone who's code was used
-* Inspiration
-* etc
+* scanlime for the amazing Fadecandy!
